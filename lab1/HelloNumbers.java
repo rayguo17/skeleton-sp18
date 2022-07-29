@@ -8,5 +8,8 @@ public class HelloNumbers {
             
             x=x+1;
         }
+        String h= 5+"horse"; //"5horse"
+        //int a = 5 + "horse";
+        System.out.println(h);
     }
 }
