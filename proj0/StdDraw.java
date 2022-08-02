@@ -1273,6 +1273,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
         // in case file is inside a .jar (classpath relative to root of jar)
         if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
             URL url = StdDraw.class.getResource("/" + filename);
+
             if (url == null) throw new IllegalArgumentException("image " + filename + " not found");
             icon = new ImageIcon(url);
         }
