@@ -1,4 +1,4 @@
-public class LinkedListDeque<T> implements List61B<T>{
+public class LinkedListDeque<T> implements Deque<T>{
     public GenericNode sentinel;
     private int size;
 
@@ -19,22 +19,24 @@ public class LinkedListDeque<T> implements List61B<T>{
         sentinel.prev = sentinel;
         size = 0;
     }
-    public LinkedListDeque(T x){
-        this();
-        addLast(x);
-    }
+
+    @Override
     public void addFirst(T item){
         GenericNode newNode = new GenericNode(item,sentinel,sentinel.next);
         sentinel.next.prev = newNode;
         sentinel.next = newNode;
         size +=1;
     }
+
+    @Override
     public void addLast(T item){
         GenericNode newNode = new GenericNode(item,sentinel.prev,sentinel);
         sentinel.prev.next = newNode;
         sentinel.prev = newNode;
         size += 1;
     }
+
+    @Override
     public T get(int index){
         if(index >= size){
             return null;
@@ -55,10 +57,12 @@ public class LinkedListDeque<T> implements List61B<T>{
 
         }
     }
+    @Override
     public int size(){
         return size;
     }
 
+    @Override
     public void printDeque(){
         GenericNode tmp = sentinel.next;
         while(!tmp.equals(sentinel)){
@@ -67,6 +71,7 @@ public class LinkedListDeque<T> implements List61B<T>{
         }
         System.out.println("");
     }
+    @Override
     public T removeLast(){
         if (size ==0){
             return null;
@@ -76,6 +81,7 @@ public class LinkedListDeque<T> implements List61B<T>{
         sentinel.prev = sentinel.prev.prev;
         return val;
     }
+    @Override
     public T removeFirst(){
         if (size == 0) {
             return null;
