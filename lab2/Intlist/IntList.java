@@ -69,6 +69,7 @@ public class IntList {
         if (L == null) {
             return null;
         }
+
         return new IntList(L.first * L.first, squareListRecursive(L.rest));
     }
 
