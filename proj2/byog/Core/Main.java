@@ -16,6 +16,7 @@ public class Main {
             TETile[][] worldState = game.playWithInputString(args[0]);
             System.out.println(TETile.toString(worldState));
         } else {
+            System.out.println("running keyboard");
             Game game = new Game();
             game.playWithKeyboard();
         }

@@ -119,12 +119,12 @@ public class HexWorld {
                 tiles[x][y] = Tileset.NOTHING;
             }
         }
-        for (int x=0;x<WIDTH;x+=1){
+        for (int x=0;x<WIDTH-5;x+=1){
             tiles[x][0]=randomTile();
         }
         ter.renderFrame(tiles);
     }
     public static void main(String[] args) {
-        testPrintHexagon();
+        testAxis();
     }
 }
