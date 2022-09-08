@@ -51,9 +51,14 @@ public class Room{
         }
         return new WorldGenerator.Position(x,y);
     }
-    public PosDir isCollapse(Room o,int randomSeed){
+    public WorldGenerator.Position randPos(Random rand){
+        int randX = RandomUtils.uniform(rand,p.x+1,p.x+width-1);
+        int randY = RandomUtils.uniform(rand,p.y+1,p.y+height-1);
+        return new WorldGenerator.Position(randX,randY);
+    }
+    public PosDir isCollapse(Room o,Random rand){
         //vertical
-        Random random = new Random(randomSeed);
+
         int verBottom = Math.max(p.y,o.p.y);
         int verUpper = Math.min(p.y+height-1,o.p.y+o.height-1);
         Direction d;
@@ -63,7 +68,7 @@ public class Room{
             if(verBottom==verUpper){
                 chosenY=verBottom;
             }else{
-                chosenY=RandomUtils.uniform(random,verBottom==0?verBottom+1:verBottom,verUpper);
+                chosenY=RandomUtils.uniform(rand,verBottom==0?verBottom+1:verBottom,verUpper);
             }
 
             //tell left or right?
@@ -95,7 +100,7 @@ public class Room{
             if(horLeft==horRight){
                 chosenX=horLeft;
             }else{
-                chosenX = RandomUtils.uniform(random,horLeft,horRight);
+                chosenX = RandomUtils.uniform(rand,horLeft,horRight);
             }
 
             int chosenY;

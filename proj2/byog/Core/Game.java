@@ -2,41 +2,137 @@ package byog.Core;
 
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
-import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.DepthFirstDirectedPaths;
+import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
 
 public class Game {
-    TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+    public static final int xOffset = 3;
+    public static final int yOffset = 3;
     public static final int TILE_SIZE = 16;
-
+    public World world;
+    public Renderer renderer;
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
     public void playWithKeyboard() {
         StdDraw.enableDoubleBuffering();
+        renderer = new Renderer(WIDTH,HEIGHT,xOffset,yOffset);
+        //should use renderer to print main page as well
         while(true){
             if(StdDraw.hasNextKeyTyped()){
                 char c = StdDraw.nextKeyTyped();
                 switch(c) {
                     case 'n':
                         System.out.println("game start");
+                        handleNew();
                         break;
                     case 'q':
                         System.out.println("QUIT");
                         System.exit(0);
                     case 'l':
                         System.out.println("Load Game");
+                        handleLoad();
                         break;
                     default:
+                        int b = c;
+                        System.out.printf("%d",b);
+                        continue;
                 }
                 System.out.println(c);
+                break;
             }
             drawMain();
         }
+        while(StdDraw.hasNextKeyTyped()){
+            StdDraw.nextKeyTyped();
+        }
+        StdDraw.clear(StdDraw.BLACK);
+        boolean quitFlag = false;
+        while(true){
+            //System.out.println("inside while loop");
+            if(StdDraw.hasNextKeyTyped()){
+
+                char c = StdDraw.nextKeyTyped();
+                System.out.println(c);
+                switch (c){
+                    case 'W':
+                    case 'A':
+                    case 'S':
+                    case 'D':
+                        quitFlag=false;
+                        world.handleMovement(c);
+                        break;
+                    case 10 :
+                        quitFlag=false;
+                        world.handleInteract(c);
+                        break;
+                    case ':':
+                        quitFlag=true;
+                        break;
+                    case 'Q':
+                        if(quitFlag) {
+                            //should save the world.
+                            handleSave();
+                            System.exit(0);
+                        }
+                    default:
+                }
+            }
+            //should use other as well, or world should have some status information.
+            renderer.drawWorld(world.getCurrentWorld(),StdDraw.mouseX(),StdDraw.mouseY());
+
+
+            StdDraw.pause(200);
+        }
+    }
+    public void handleLoad(){
+
+    }
+    public void handleSave(){
+        //save the world!!!!
+    }
+    public void handleNew(){
+        while(StdDraw.hasNextKeyTyped()){
+            StdDraw.nextKeyTyped();
+        }
+
+        StringBuilder stb = new StringBuilder();
+        while(true){
+            if(StdDraw.hasNextKeyTyped()){
+                char c = StdDraw.nextKeyTyped();
+                if(c>='0' && c<='9'){
+                    stb.append(c);
+
+                }
+                if(c==10){
+                    System.out.println("input done!");
+                    break;
+                }
+            }
+            drawInput(stb.toString());
+        }
+        int seed = Integer.parseInt(stb.toString());
+        world = new World(WIDTH,HEIGHT,seed);
+
+
+    }
+    public void drawInput(String seed){
+        StdDraw.clear(StdDraw.BLACK);
+        Font headerFont = new Font("Arial",Font.TRUETYPE_FONT,30);
+        StdDraw.setFont(headerFont);
+
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.text(0.5*(WIDTH), 0.8*HEIGHT, "CS61B: THE GAME");
+        Font bodyFont = new Font("Sans Serif", Font.TRUETYPE_FONT,20);
+        StdDraw.setFont(bodyFont);
+        StdDraw.text(0.5*WIDTH, 0.5*HEIGHT, "input random seed:");
+        StdDraw.text(0.5*WIDTH, 0.45*HEIGHT, seed);
+        StdDraw.show();
     }
     public void drawMain(){
         StdDraw.clear(StdDraw.BLACK);
@@ -44,14 +140,14 @@ public class Game {
         StdDraw.setFont(headerFont);
 
         StdDraw.setPenColor(StdDraw.WHITE);
-        StdDraw.text(0.5, 0.8, "CS61B: THE GAME");
+        StdDraw.text(0.5*WIDTH, 0.8*HEIGHT, "CS61B: THE GAME");
         Font bodyFont = new Font("Sans Serif", Font.TRUETYPE_FONT,20);
         StdDraw.setFont(bodyFont);
-        StdDraw.text(0.5, 0.5, "New Game (N)");
-        StdDraw.text(0.5, 0.45, "Load Game (L)");
-        StdDraw.text(0.5, 0.40, "Quit (Q)");
+        StdDraw.text(0.5*WIDTH, 0.5*HEIGHT, "New Game (N)");
+        StdDraw.text(0.5*WIDTH, 0.45*HEIGHT, "Load Game (L)");
+        StdDraw.text(0.5*WIDTH, 0.40*HEIGHT, "Quit (Q)");
         StdDraw.show();
-        StdDraw.pause(100);
+        //StdDraw.pause(100);
 
     }
 

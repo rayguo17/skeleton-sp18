@@ -3,47 +3,69 @@ package byog.Core;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
+import edu.princeton.cs.algs4.StdDraw;
 
+import java.io.IOException;
 import java.util.*;
 
 public class WorldGenerator {
-    private final static int WIDTH = 80;
-    private final static int HEIGHT = 30;
+    private  int WIDTH;
+    private  int HEIGHT;
     public static double ratio = 0;
-    public static int RANDOM_SEED=82731;
+    public int RANDOM_SEED=82731;
+    public static Random rand;
     public static int filled = 0;
     public static boolean connMat[][];
     public static List<Room> rooms;
 
     public static void main(String[] args) {
         TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH,HEIGHT);
-        TETile[][] tiles = new TETile[WIDTH][HEIGHT];
-        clearTiles(tiles);
-        //testEnum();
+        WorldGenerator wg = new WorldGenerator(80,30,1234);
+        ter.initialize(wg.WIDTH,wg.HEIGHT);
+        TETile[][] tiles = new TETile[wg.WIDTH][wg.HEIGHT];
+        wg.generateNLevel(tiles,1);
+
+        ter.renderFrame(tiles);
+        StdDraw.pause(5000);
+        wg.generateNLevel(tiles,2);
+        ter.renderFrame(tiles);
+        StdDraw.pause(5000);
+    }
+
+    public WorldGenerator(int w,int h, int seed){
+        WIDTH = w;
+        HEIGHT = h;
+        rand = new Random(seed);
+        RANDOM_SEED = seed;
+    }
+    public Position generateNLevel(TETile[][] world,int n){
+        rand= new Random(RANDOM_SEED);
+        Position p=null;
+        for(int i=0;i<n;i++){
+            generateEntry(world);
+            p = playerStartPos();
+            //world[p.x][p.y] = Tileset.PLAYER;
+        }
+        return p;
+    }
+    //should have a method return the TileMap
+    public void generateEntry(TETile[][] world){
+
+        clearTiles(world);
         while(true){
-            worldGenerator(tiles);
-            connectAll(tiles);
+            worldGenerator(world);
+            connectAll(world);
             if(checkConnect()){
                 System.out.println("All rooms are connected!");
                 break;
-            }else{
+            }else {
                 System.out.println("Not all rooms are connected...");
-                clearTiles(tiles);
+                clearTiles(world);
             }
-            System.out.println("Loop detecting");
         }
-        System.out.println("out side loop");
-        //check connMat
-        placeDoor(tiles);
-        printConnMat();
-
-        //testConnect(tiles);
-        ter.renderFrame(tiles);
+        placeDoor(world);
     }
-    //should have a method return the TileMap
-
-    public static void clearTiles(TETile[][] world){
+    private void clearTiles(TETile[][] world){
         for (int x = 0; x < WIDTH; x += 1) {
             for (int y = 0; y < HEIGHT; y += 1) {
                 world[x][y] = Tileset.NOTHING;
@@ -59,7 +81,7 @@ public class WorldGenerator {
             System.out.println("]");
         }
     }
-    public static boolean checkConnect(){
+    private static boolean checkConnect(){
         boolean[] connectedSeq = new boolean[rooms.size()];
         int connected = 0;
         Stack<Integer> waitList = new Stack<>();
@@ -92,19 +114,23 @@ public class WorldGenerator {
         }
     }
 
-
-    public static void worldGenerator(TETile[][] world){
+    public Position playerStartPos(){
+        Room target = rooms.get(RandomUtils.uniform(rand,rooms.size()-1));
+        //should mark it in tile?
+        return target.randPos(rand);
+    }
+    private void worldGenerator(TETile[][] world){
         //calculate
         //each time get a new position:
         rooms = new LinkedList<>();
-        Random random = new Random(RANDOM_SEED);
+
         ratio=0;
         filled=0;
         while(ratio<0.4){
-            int x = RandomUtils.uniform(random,0,WIDTH);
-            int y = RandomUtils.uniform(random,0,HEIGHT);
-            int width = RandomUtils.uniform(random,5,15);
-            int height = RandomUtils.uniform(random,5,15);
+            int x = RandomUtils.uniform(rand,0,WIDTH);
+            int y = RandomUtils.uniform(rand,0,HEIGHT);
+            int width = RandomUtils.uniform(rand,5,15);
+            int height = RandomUtils.uniform(rand,5,15);
             Position p = new Position(x,y);
             if (!willCollapse(p,width,height,world)){
                 addRoom(p,width,height,world);
@@ -116,12 +142,12 @@ public class WorldGenerator {
             //System.out.println(ratio);
         }
         connMat = new boolean[rooms.size()][rooms.size()];
-        System.out.println(rooms.size());
+        //System.out.println(rooms.size());
 
 
 
     }
-    public static void addRoom(Position p, int width, int height, TETile[][] world){
+    private static void addRoom(Position p, int width, int height, TETile[][] world){
         //check collapse
         //room size 2-10
         for(int i=0;i<width;i++){
@@ -137,7 +163,7 @@ public class WorldGenerator {
 
 
     }
-    public static boolean willCollapse(Position p, int width,int height, TETile[][] world){
+    private static boolean willCollapse(Position p, int width,int height, TETile[][] world){
         for(int i=0;i<width;i++){
             for(int j =0;j<height;j++){
                 if (p.x+i>=world.length){
@@ -153,13 +179,9 @@ public class WorldGenerator {
         }
         return false;
     }
-    public static void connectRooms(TETile[][] world){
-
-    }
-
-    public static boolean connect(Room a, Room b,TETile[][] world ){
+    private static boolean connect(Room a, Room b,TETile[][] world ){
         //collapse or not,
-        Room.PosDir p = a.isCollapse(b,RANDOM_SEED);
+        Room.PosDir p = a.isCollapse(b,rand);
         if (p!=null){
             Position start = p.start;
             Position end = p.end;
@@ -172,7 +194,7 @@ public class WorldGenerator {
         }
         return false;
     }
-    public static void p2pConnect(Position start, Position end, Room.Direction d, TETile[][]world){
+    private static void p2pConnect(Position start, Position end, Room.Direction d, TETile[][]world){
         int[] dirArr = Room.dirArr[d.ordinal()];
         int tmpX = start.x-dirArr[0];
         int tmpY = start.y-dirArr[1];
@@ -233,7 +255,7 @@ public class WorldGenerator {
 
 
     }
-    public static class IndexDis implements Comparable<IndexDis>{
+    private static class IndexDis implements Comparable<IndexDis>{
         public int Dis;
         public int index;
         @Override
@@ -241,7 +263,7 @@ public class WorldGenerator {
             return Dis-indexDis.Dis;
         }
     }
-    public static void connectAll(TETile[][] world){
+    private  void connectAll(TETile[][] world){
         Random random = new Random(RANDOM_SEED);
         for (int i=0;i<rooms.size();i++){
             PriorityQueue<IndexDis> pd = new PriorityQueue<>();
@@ -267,14 +289,14 @@ public class WorldGenerator {
             }
         }
     }
-    public static void placeDoor(TETile[][] world){
+    private void placeDoor(TETile[][] world){
         //randomly choose a room, and then randomly choose a wall if it is wall,replace it with door.
-        Random random = new Random(RANDOM_SEED);
-        int roomNumber = RandomUtils.uniform(random,0,rooms.size());
+
+        int roomNumber = RandomUtils.uniform(rand,0,rooms.size()-1);
         Room selected = rooms.get(roomNumber);
         while(true){
-            Position p = selected.randomWall(random);
-            System.out.printf("x: %d, y: %d\n",p.x,p.y);
+            Position p = selected.randomWall(rand);
+            //System.out.printf("x: %d, y: %d\n",p.x,p.y);
             if(world[p.x][p.y]==Tileset.WALL && validPos(p.x+1,p.y) && validPos(p.x-1,p.y) && validPos(p.x,p.y+1) && validPos(p.x, p.y-1)){
                 //first up/down
                 if((world[p.x+1][p.y]==Tileset.WALL && world[p.x-1][p.y]==Tileset.WALL) ||( world[p.x][p.y+1]==Tileset.WALL&&world[p.x][p.y-1]==Tileset.WALL) ){
@@ -285,14 +307,14 @@ public class WorldGenerator {
             }
         }
     }
-    public static boolean validPos(int x, int y){
+    private boolean validPos(int x, int y){
         if(x<0 || x>WIDTH || y<0 || y>HEIGHT){
             return false;
         }
         return true;
     }
-    public static int calDis(Room a, Room b){
-        Room.PosDir p = a.isCollapse(b,RANDOM_SEED);
+    private static int calDis(Room a, Room b){
+        Room.PosDir p = a.isCollapse(b,rand);
         if (p!=null){
             switch (p.d){
                 case UP:

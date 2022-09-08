@@ -125,6 +125,6 @@ public class HexWorld {
         ter.renderFrame(tiles);
     }
     public static void main(String[] args) {
-        testAxis();
+        testPrintHexagon();
     }
 }
