@@ -14,6 +14,7 @@ public class Main {
         } else if (args.length == 1) {
             Game game = new Game();
             TETile[][] worldState = game.playWithInputString(args[0]);
+            //return a TileMap[][]
             System.out.println(TETile.toString(worldState));
         } else {
             System.out.println("running keyboard");

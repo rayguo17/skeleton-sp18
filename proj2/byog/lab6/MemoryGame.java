@@ -69,7 +69,7 @@ public class MemoryGame {
         StdDraw.setFont(headFont);
         StdDraw.textLeft(0,0.97*height,String.format("Round: %d",round));
         StdDraw.text(0.5*width,0.97*height,playerTurn?"Type!":"Watch!");
-        StdDraw.textRight(width,0.97*height,ENCOURAGEMENT[s.length()]);
+        StdDraw.textRight(width,0.97*height,ENCOURAGEMENT[0]);
         StdDraw.line(0,0.95*height,width,0.95*height);
         Font bodyFont = new Font("Sans Serif", Font.TRUETYPE_FONT,30);
         StdDraw.setFont(bodyFont);
@@ -92,6 +92,10 @@ public class MemoryGame {
 
     public String solicitNCharsInput(int n) {
         //TODO: Read n letters of player input
+        while(StdDraw.hasNextKeyTyped()){
+            StdDraw.nextKeyTyped();
+            //clear all buffer key!
+        }
         StringBuilder stb = new StringBuilder();
         while(stb.length()<n){
             if(StdDraw.hasNextKeyTyped()){
