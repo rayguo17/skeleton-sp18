@@ -1,8 +1,9 @@
 package byog.Core;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Room{
+public class Room implements Serializable {
     public WorldGenerator.Position p;
     public int width;
     public int height;

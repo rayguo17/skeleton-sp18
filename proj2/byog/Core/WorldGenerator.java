@@ -6,13 +6,14 @@ import byog.TileEngine.Tileset;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
-public class WorldGenerator {
+public class WorldGenerator implements Serializable {
     private  int WIDTH;
     private  int HEIGHT;
     public static double ratio = 0;
-    public int RANDOM_SEED=82731;
+    public int RANDOM_SEED;
     public static Random rand;
     public static int filled = 0;
     public static boolean connMat[][];
@@ -38,15 +39,31 @@ public class WorldGenerator {
         rand = new Random(seed);
         RANDOM_SEED = seed;
     }
-    public Position generateNLevel(TETile[][] world,int n){
+    //world generate and item generate should have different random? or could be
+    public List<Interactable> generateNLevel(TETile[][] world,int n){
         rand= new Random(RANDOM_SEED);
-        Position p=null;
-        for(int i=0;i<n;i++){
+        List<Interactable> layerList = null;
+        for(int i=0;i<n+1;i++){
+            layerList = new LinkedList<>();
             generateEntry(world);
-            p = playerStartPos();
+            //place door and place player
+            Door downward = placeDoor(world,true);
+            if(i>=1){
+                //layer larger than 2 should have two door one downward, one upward.
+                //player should be spawn in upward door place!
+
+                Door upward = placeDoor(world,false);
+                layerList.add(upward);
+                layerList.add(new Player(upward.getPosition().copyPos()));
+            }else{
+                layerList.add(playerStartPos());
+            }
+            layerList.add(downward);
+            //should have two different door for n>1;
             //world[p.x][p.y] = Tileset.PLAYER;
         }
-        return p;
+        return layerList;
+        //generate door and other object
     }
     //should have a method return the TileMap
     public void generateEntry(TETile[][] world){
@@ -63,7 +80,7 @@ public class WorldGenerator {
                 clearTiles(world);
             }
         }
-        placeDoor(world);
+
     }
     private void clearTiles(TETile[][] world){
         for (int x = 0; x < WIDTH; x += 1) {
@@ -105,19 +122,26 @@ public class WorldGenerator {
 
        return connected==rooms.size();
     }
-    public static class Position{
+    public static class Position implements Serializable{
         public int x;
         public int y;
         public Position(int x, int y){
             this.x = x;
             this.y = y;
         }
+        public boolean equals(Position p) {
+            return p.x==x && p.y==y;
+        }
+        public Position copyPos(){
+            return new Position(x,y);
+        }
     }
 
-    public Position playerStartPos(){
+    public Player playerStartPos(){
         Room target = rooms.get(RandomUtils.uniform(rand,rooms.size()-1));
         //should mark it in tile?
-        return target.randPos(rand);
+        Player p = new Player(target.randPos(rand));
+        return p;
     }
     private void worldGenerator(TETile[][] world){
         //calculate
@@ -289,7 +313,7 @@ public class WorldGenerator {
             }
         }
     }
-    private void placeDoor(TETile[][] world){
+    private Door placeDoor(TETile[][] world,boolean downward){
         //randomly choose a room, and then randomly choose a wall if it is wall,replace it with door.
 
         int roomNumber = RandomUtils.uniform(rand,0,rooms.size()-1);
@@ -299,9 +323,10 @@ public class WorldGenerator {
             //System.out.printf("x: %d, y: %d\n",p.x,p.y);
             if(world[p.x][p.y]==Tileset.WALL && validPos(p.x+1,p.y) && validPos(p.x-1,p.y) && validPos(p.x,p.y+1) && validPos(p.x, p.y-1)){
                 //first up/down
-                if((world[p.x+1][p.y]==Tileset.WALL && world[p.x-1][p.y]==Tileset.WALL) ||( world[p.x][p.y+1]==Tileset.WALL&&world[p.x][p.y-1]==Tileset.WALL) ){
+                if((world[p.x+1][p.y]==Tileset.WALL && world[p.x-1][p.y]==Tileset.WALL && (world[p.x][p.y+1]==Tileset.FLOOR || world[p.x][p.y-1]==Tileset.FLOOR)) ||( world[p.x][p.y+1]==Tileset.WALL&&world[p.x][p.y-1]==Tileset.WALL && (world[p.x+1][p.y]==Tileset.FLOOR || world[p.x-1][p.y]==Tileset.FLOOR)) ){
                     world[p.x][p.y]=Tileset.LOCKED_DOOR;
-                    break;
+                    return new Door(p.x,p.y,downward?Door.Dir.DOWNWARD: Door.Dir.UPWARD);
+                    //don't change the world, instead place it in world!
                 }
 
             }

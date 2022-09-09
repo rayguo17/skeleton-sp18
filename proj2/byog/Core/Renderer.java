@@ -20,6 +20,7 @@ public class Renderer {
             yOffset = y;
             ter.initialize(w+x,h+y,0,0);
     }
+    //player should be the last one to be rendered.
     public void drawWorld(TETile[][] world,double mouseX,double mouseY){
         ter.renderFrame(world);
         if(mouseX>WIDTH || mouseY>HEIGHT){

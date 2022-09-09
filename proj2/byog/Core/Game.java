@@ -1,11 +1,11 @@
 package byog.Core;
 
-import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
-import edu.princeton.cs.algs4.DepthFirstDirectedPaths;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
+import java.io.*;
+import java.util.List;
 
 public class Game {
     /* Feel free to change the width and height. */
@@ -14,7 +14,7 @@ public class Game {
     public static final int xOffset = 3;
     public static final int yOffset = 3;
     public static final int TILE_SIZE = 16;
-    public World world;
+    public WorldManager wm;
     public Renderer renderer;
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
@@ -36,7 +36,9 @@ public class Game {
                         System.exit(0);
                     case 'l':
                         System.out.println("Load Game");
-                        handleLoad();
+                        if(!handleLoad()){
+                            continue;
+                        };
                         break;
                     default:
                         int b = c;
@@ -65,11 +67,11 @@ public class Game {
                     case 'S':
                     case 'D':
                         quitFlag=false;
-                        world.handleMovement(c);
+                        wm.handleMovement(c);
                         break;
                     case 10 :
                         quitFlag=false;
-                        world.handleInteract(c);
+                        wm.handleInteract();
                         break;
                     case ':':
                         quitFlag=true;
@@ -84,17 +86,55 @@ public class Game {
                 }
             }
             //should use other as well, or world should have some status information.
-            renderer.drawWorld(world.getCurrentWorld(),StdDraw.mouseX(),StdDraw.mouseY());
+            renderer.drawWorld(wm.getCurrentWorld(),StdDraw.mouseX(),StdDraw.mouseY());
 
 
             StdDraw.pause(200);
         }
     }
-    public void handleLoad(){
+    public boolean handleLoad(){
+        File f = new File("./world.txt");
+        if (f.exists()) {
+            try {
+                FileInputStream fs = new FileInputStream(f);
+                ObjectInputStream os = new ObjectInputStream(fs);
+                WorldManager loadWorld = (WorldManager) os.readObject();
+                os.close();
+                wm = loadWorld;
+                return true;
+            } catch (FileNotFoundException e) {
+                System.out.println("file not found");
+                System.exit(0);
+            } catch (IOException e) {
+                System.out.println(e);
+                System.exit(0);
+            } catch (ClassNotFoundException e) {
+                System.out.println("class not found");
+                System.exit(0);
+            }
+        }
 
+        /* In the case no World has been saved yet, we return a new one. */
+        return false;
     }
     public void handleSave(){
         //save the world!!!!
+        File f = new File("./world.txt");
+        try{
+            if(!f.exists()){
+                f.createNewFile();
+            }
+            FileOutputStream fs = new FileOutputStream(f);
+            ObjectOutputStream os = new ObjectOutputStream(fs);
+            os.writeObject(wm);
+            os.close();
+        }catch(FileNotFoundException e){
+            System.out.println("file not found");
+            System.exit(0);
+        }catch (IOException e){
+            System.out.println(e);
+            System.exit(0);
+        }
     }
     public void handleNew(){
         while(StdDraw.hasNextKeyTyped()){
@@ -117,7 +157,8 @@ public class Game {
             drawInput(stb.toString());
         }
         int seed = Integer.parseInt(stb.toString());
-        world = new World(WIDTH,HEIGHT,seed);
+        wm = new WorldManager(WIDTH,HEIGHT,seed);
+
 
 
     }
