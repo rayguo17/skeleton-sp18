@@ -208,8 +208,68 @@ public class Game {
         // TODO: Fill out this method to run the game using the input passed in,
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
+        boolean isMenu = true;
+        for(int i=0;i<input.length();i++){
+            if(isMenu){
+                switch(input.charAt(i)){
+                    case 'N':
+                        i=handleNew(input);
+                        isMenu = false;
+                        break;
+                    case 'L':
+                        handleLoad();
+                        isMenu=false;
+                        break;
+                    default:
+                }
+            }else{
+                char c = input.charAt(i);
+                boolean quitFlag=false;
+                switch(c){
+                    case 'W':
+                    case 'A':
+                    case 'S':
+                    case 'D':
+                        quitFlag=false;
+                        wm.handleMovement(c);
+                        break;
+                    case ':':
+                        quitFlag=true;
+                    case 'Q':
+                        if(quitFlag){
+                            handleSave();
+                            System.exit(0);
+                        }
+                        break;
+                    default:
+                }
 
-        TETile[][] finalWorldFrame = null;
+            }
+
+        }
+        TETile[][] finalWorldFrame = wm.getCurrentWorld();
         return finalWorldFrame;
+    }
+    public int handleNew(String input){
+        StringBuilder stb = new StringBuilder();
+        boolean startFlag = false;
+        int i;
+        for(i=0;i<input.length();i++){
+            if(startFlag){
+                char c = input.charAt(i);
+                if(c>='0' && c<='9'){
+                    stb.append(c);
+                }else{
+                    break;
+                }
+            }
+            if(input.charAt(i)=='N'){
+                startFlag=true;
+            }
+        }
+        int seed = Integer.parseInt(stb.toString());
+        wm = new WorldManager(WIDTH,HEIGHT,seed);
+        //last digit
+        return i-1;
     }
 }
