@@ -36,6 +36,7 @@ public class PercolationStats {
 
     public static void main(String[] args) {
         PercolationStats ps = new PercolationStats(5,5,new PercolationFactory());
+
     }
     public double mean(){
 

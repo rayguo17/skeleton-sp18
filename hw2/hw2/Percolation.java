@@ -42,9 +42,12 @@ public class Percolation {
             return false;
         }
         //
-        if(grid.find(row*size+col)<size){
-            return true;
+        for(int i=0;i<size;i++){
+            if(grid.find(row*size+col)==grid.find(i)){
+                return true;
+            }
         }
+
         return false;
     }
     public int numberOfOpenSites(){
@@ -62,10 +65,10 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
-        Percolation p1 = new Percolation(3);
+        Percolation p1 = new Percolation(5);
         p1.open(0,0);
         p1.open(0,1);
-        System.out.println(p1.isFull(0,1));
+        System.out.println(p1.isFull(0,0));
         p1.open(1,2);
         System.out.println(p1.isOpen(1,2));
         System.out.println(p1.isFull(1,2));
