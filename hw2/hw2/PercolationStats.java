@@ -35,7 +35,7 @@ public class PercolationStats {
     }
 
     public static void main(String[] args) {
-        PercolationStats ps = new PercolationStats(5,30,new PercolationFactory());
+        PercolationStats ps = new PercolationStats(20,10,new PercolationFactory());
 
         System.out.println(ps.mean);
         System.out.println(ps.stddev());
