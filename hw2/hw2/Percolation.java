@@ -7,10 +7,13 @@ public class Percolation {
     private boolean[][] openGrid;
     private int size ;
     private int openSites;
-    public int[][] dirArr = {
+    private int[][] dirArr = {
             {1,0},{-1,0},{0,1},{0,-1}
     };
     public Percolation(int N){
+        if(N<=0){
+            throw new IllegalArgumentException();
+        }
         grid  = new WeightedQuickUnionUF(N*N);
         size = N;
         openGrid=new boolean[N][N];
@@ -43,6 +46,9 @@ public class Percolation {
         }
         //
         for(int i=0;i<size;i++){
+            if(!isOpen(0,i)){
+                continue;
+            }
             if(grid.find(row*size+col)==grid.find(i)){
                 return true;
             }
@@ -55,7 +61,13 @@ public class Percolation {
     }
     public boolean percolates(){
         for(int i=0;i<size;i++){
+            if(!isOpen(size-1,i)){
+                continue;
+            }
             for(int j=0;j<size;j++){
+                if(!isOpen(0,j)){
+                    continue;
+                }
                 if(grid.find((size-1)*size+i)==grid.find(j)){
                     return true;
                 }

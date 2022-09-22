@@ -5,10 +5,10 @@ import edu.princeton.cs.algs4.StdRandom;
 import java.util.ArrayList;
 
 public class PercolationStats {
-    double[] thresholds;
-    double mean;
-    int times;
-    double stddev;
+    private double[] thresholds;
+    private double mean;
+    private int times;
+    private double stddev;
 
     public PercolationStats(int N, int T,PercolationFactory pf){
         if(N<=0 || T<=0){
@@ -26,27 +26,31 @@ public class PercolationStats {
                 p.open(row,col);
 
             }
-            thresholds[i]=p.numberOfOpenSites();
+            thresholds[i]=p.numberOfOpenSites()/(double)(N*N);
             sum+=thresholds[i];
         }
-        mean = sum/(double)T;
+        mean = sum/(double)(T);
         times = T;
         stddev=0;
     }
 
     public static void main(String[] args) {
-        PercolationStats ps = new PercolationStats(5,5,new PercolationFactory());
+        PercolationStats ps = new PercolationStats(5,30,new PercolationFactory());
 
+        System.out.println(ps.mean);
+        System.out.println(ps.stddev());
+        System.out.println(ps.confidenceHigh());
+        System.out.println(ps.confidenceLow());
     }
     public double mean(){
 
         return mean;
     }
     public double stddev(){
-        if(stddev!=0){
+        if(stddev!=0.0){
             return stddev;
         }
-        int sum = 0;
+        double sum = 0;
         for(int i=0;i<times;i++){
             double diff = thresholds[i]-mean;
             sum += diff*diff;
