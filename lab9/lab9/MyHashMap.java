@@ -3,6 +3,8 @@ package lab9;
 import java.util.Iterator;
 import java.util.Set;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  *  A hash table-backed Map implementation. Provides amortized constant time
  *  access to elements via get(), remove(), and put() in the best case.
@@ -53,19 +55,56 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      */
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        //decided
+        int buckNumber = hash(key);
+        return buckets[buckNumber].get(key);
+
     }
 
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
-    }
+        int n = hash(key);
+        //calculate load factor.
+        if(!buckets[n].containsKey(key)){
+            if(isLoadFull()){
+                resize(buckets.length*2);
+                n = hash(key);
+            }
+            size++;
+        }
+        buckets[n].put(key,value);
 
+
+    }
+    private boolean isLoadFull(){
+        return (double)size/(double)buckets.length>MAX_LF;
+    }
+    private void resize(int capacity){
+        //for things in bucket need to recalculate hash and then allocate to new bucket.
+        ArrayMap<K,V>[] newMap = new ArrayMap[capacity];
+        for(int i=0;i<capacity;i++){
+            newMap[i] = new ArrayMap<>();
+        }
+        for(int i=0;i< buckets.length;i++){
+            for(K key:buckets[i]){
+                //recalculate hash,
+                int n = hash(key,capacity);
+                newMap[n].put(key,buckets[i].get(key));
+            }
+        }
+        buckets = newMap;
+    }
+    private int hash(K key, int cap){
+        if (key == null) {
+            return 0;
+        }
+        return Math.floorMod(key.hashCode(), cap);
+    }
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return size;
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
@@ -95,5 +134,13 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     @Override
     public Iterator<K> iterator() {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) {
+        MyHashMap<String,String> b = new MyHashMap<>();
+        b.put("Hello","World");
+        b.size();
+        b.put("Hello","Kelvin");
+        b.size();
     }
 }
