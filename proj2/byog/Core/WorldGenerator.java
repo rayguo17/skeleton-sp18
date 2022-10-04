@@ -1,11 +1,14 @@
 package byog.Core;
 
+import byog.Core.Items.Door;
+import byog.Core.Items.Interactable;
+import byog.Core.Items.Player;
+import byog.Core.Utils.RandomUtils;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 import edu.princeton.cs.algs4.StdDraw;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -40,7 +43,7 @@ public class WorldGenerator implements Serializable {
         RANDOM_SEED = seed;
     }
     //world generate and item generate should have different random? or could be
-    public List<Interactable> generateNLevel(TETile[][] world,int n){
+    public List<Interactable> generateNLevel(TETile[][] world, int n){
         rand= new Random(RANDOM_SEED);
         List<Interactable> layerList = null;
         for(int i=0;i<n+1;i++){

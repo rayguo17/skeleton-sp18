@@ -1,6 +1,8 @@
-package byog.Core;
+package byog.Core.Items;
 
-import java.io.Serializable;
+import byog.Core.Items.Interactable;
+import byog.Core.WorldGenerator;
+import byog.Core.WorldManager;
 
 public class Player implements Interactable {
     public WorldGenerator.Position p;

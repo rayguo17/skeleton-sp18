@@ -1,5 +1,7 @@
 package byog.Core;
 
+import byog.Core.Utils.RandomUtils;
+
 import java.io.Serializable;
 import java.util.Random;
 

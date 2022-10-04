@@ -86,7 +86,7 @@ public class Game {
                 }
             }
             //should use other as well, or world should have some status information.
-            renderer.drawWorld(wm.getCurrentWorld(),StdDraw.mouseX(),StdDraw.mouseY());
+            renderer.drawWorld(wm.getCurrentWorld(),StdDraw.mouseX(),StdDraw.mouseY(),wm.getCurrentLayer());
 
 
             StdDraw.pause(200);

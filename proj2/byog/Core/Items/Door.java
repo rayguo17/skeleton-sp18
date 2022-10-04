@@ -1,6 +1,9 @@
-package byog.Core;
+package byog.Core.Items;
 
-public class Door  implements Interactable{
+import byog.Core.WorldGenerator;
+import byog.Core.WorldManager;
+
+public class Door  implements Interactable {
     public WorldGenerator.Position p;
     public Dir status;
     public boolean locked;

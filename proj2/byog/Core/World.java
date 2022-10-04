@@ -1,13 +1,12 @@
 package byog.Core;
 
-import byog.TileEngine.TERenderer;
+import byog.Core.Items.Interactable;
+import byog.Core.Items.Player;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
-import edu.princeton.cs.introcs.StdDraw;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class World implements Serializable {

@@ -1,6 +1,6 @@
 package byog.lab6;
 
-import byog.Core.RandomUtils;
+import byog.Core.Utils.RandomUtils;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.Color;

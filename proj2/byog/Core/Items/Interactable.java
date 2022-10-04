@@ -1,5 +1,8 @@
-package byog.Core;
+package byog.Core.Items;
 
+
+import byog.Core.WorldGenerator;
+import byog.Core.WorldManager;
 
 import java.io.Serializable;
 
