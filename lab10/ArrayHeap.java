@@ -1,4 +1,7 @@
 import org.junit.Test;
+
+import java.lang.reflect.Array;
+
 import static org.junit.Assert.*;
 
 /**
@@ -28,7 +31,8 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int leftIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+
+        return i*2;
     }
 
     /**
@@ -36,7 +40,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int rightIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+        return i*2+1;
     }
 
     /**
@@ -44,7 +48,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int parentIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+        return i/2;
     }
 
     /**
@@ -108,6 +112,22 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         validateSinkSwimArg(index);
 
         /** TODO: Your code here. */
+        int tmp = parentIndex(index);
+        int now = index;
+        boolean moveFlag = true;
+        while(inBounds(tmp)){
+            if(!moveFlag){
+                break;
+            }
+            moveFlag=false;
+            if(min(now,tmp)==now){
+                swap(now,tmp);
+                moveFlag=true;
+            }
+            now = tmp;
+            tmp = parentIndex(tmp);
+        }
+
         return;
     }
 
@@ -119,6 +139,22 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         validateSinkSwimArg(index);
 
         /** TODO: Your code here. */
+        boolean moveFlag=true;
+        int tmp = index;
+        while(moveFlag){
+            moveFlag=false;
+            int leftIndex = leftIndex(tmp);
+            int rightIndex = rightIndex(tmp);
+            int minLeftIndex = min(leftIndex,tmp);
+            int minRightIndex = min(rightIndex,tmp);
+            if(minLeftIndex==minRightIndex){
+                continue;
+            }
+            int minIndex = min(leftIndex,rightIndex);
+            moveFlag = true;
+            swap(minIndex,tmp);
+            tmp = minIndex;
+        }
         return;
     }
 
@@ -134,6 +170,10 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         }
 
         /* TODO: Your code here! */
+        contents[size+1] =new Node(item,priority);
+        size+=1;
+        swim(size);
+
     }
 
     /**
@@ -143,7 +183,8 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public T peek() {
         /* TODO: Your code here! */
-        return null;
+
+        return contents[1].myItem;
     }
 
     /**
@@ -158,7 +199,13 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public T removeMin() {
         /* TODO: Your code here! */
-        return null;
+        T val = peek();
+        swap(1,size);
+        contents[size]=null;
+        size--;
+        sink(1);
+
+        return val;
     }
 
     /**
@@ -181,6 +228,24 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public void changePriority(T item, double priority) {
         /* TODO: Your code here! */
+        int index = 0;
+        boolean hookedOnce = false;
+        for(index=1;index<size;index++){
+            if(contents[index].myItem.equals(item)){
+                contents[index].myPriority=priority;
+                if(hookedOnce){
+                    swim(index);
+                }else{
+                    sink(index);
+                    hookedOnce=true;
+                    index--;
+                }
+
+            }
+
+
+        }
+
         return;
     }
 
@@ -262,6 +327,35 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         this.contents = temp;
     }
 
+    @Test
+    public void testChangePriority(){
+        ArrayHeap<String> pq = new ArrayHeap<>();
+        pq.insert("c", 3);
+        assertEquals("c", pq.contents[1].myItem);
+
+        pq.insert("i", 9);
+        assertEquals("i", pq.contents[2].myItem);
+
+        pq.insert("g", 7);
+        pq.insert("d", 4);
+        assertEquals("d", pq.contents[2].myItem);
+
+        pq.insert("a", 1);
+        assertEquals("a", pq.contents[1].myItem);
+
+        pq.insert("h", 8);
+        pq.insert("e", 5);
+        pq.insert("b", 2);
+        pq.insert("c", 3);
+        pq.insert("d", 4);
+        pq.changePriority("e",10);
+        assertEquals("e",pq.contents[7].myItem);
+        pq.changePriority("i",1);
+
+        assertEquals("i",pq.contents[2].myItem);
+        System.out.println(pq);
+
+    }
     @Test
     public void testIndexing() {
         assertEquals(6, leftIndex(3));
