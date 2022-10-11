@@ -1,6 +1,5 @@
 package byog.Core;
 
-import byog.Core.Items.Door;
 import byog.Core.Items.Interactable;
 import byog.Core.Items.Player;
 import byog.Core.Utils.RandomUtils;
@@ -50,12 +49,12 @@ public class WorldGenerator implements Serializable {
             layerList = new LinkedList<>();
             generateEntry(world);
             //place door and place player
-            Door downward = placeDoor(world,true);
+            Game.Door downward = placeDoor(world,true);
             if(i>=1){
                 //layer larger than 2 should have two door one downward, one upward.
                 //player should be spawn in upward door place!
 
-                Door upward = placeDoor(world,false);
+                Game.Door upward = placeDoor(world,false);
                 layerList.add(upward);
                 layerList.add(new Player(upward.getPosition().copyPos()));
             }else{
@@ -316,7 +315,7 @@ public class WorldGenerator implements Serializable {
             }
         }
     }
-    private Door placeDoor(TETile[][] world,boolean downward){
+    private Game.Door placeDoor(TETile[][] world, boolean downward){
         //randomly choose a room, and then randomly choose a wall if it is wall,replace it with door.
 
         int roomNumber = RandomUtils.uniform(rand,0,rooms.size()-1);
@@ -328,7 +327,7 @@ public class WorldGenerator implements Serializable {
                 //first up/down
                 if((world[p.x+1][p.y]==Tileset.WALL && world[p.x-1][p.y]==Tileset.WALL && (world[p.x][p.y+1]==Tileset.FLOOR || world[p.x][p.y-1]==Tileset.FLOOR)) ||( world[p.x][p.y+1]==Tileset.WALL&&world[p.x][p.y-1]==Tileset.WALL && (world[p.x+1][p.y]==Tileset.FLOOR || world[p.x-1][p.y]==Tileset.FLOOR)) ){
                     world[p.x][p.y]=Tileset.LOCKED_DOOR;
-                    return new Door(p.x,p.y,downward?Door.Dir.DOWNWARD: Door.Dir.UPWARD);
+                    return new Game.Door(p.x,p.y,downward? Game.Door.Dir.DOWNWARD: Game.Door.Dir.UPWARD);
                     //don't change the world, instead place it in world!
                 }
 

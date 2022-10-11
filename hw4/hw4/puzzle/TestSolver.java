@@ -62,7 +62,7 @@ public class TestSolver {
         }
     }
 
-/* Uncomment once you've written Solver.
+// Uncomment once you've written Solver.
     @Test(timeout = 10000)
     public void testWordPuzzles() {
         In in = new In("input/word_puzzles.txt");
@@ -79,9 +79,8 @@ public class TestSolver {
             assertEquals(errorMessage, wps.numMoves, s.moves());
         }
     }
- */
 
- /* Uncomment everything in this block once you've written Board.
+//  Uncomment everything in this block once you've written Board.
      public static Board readBoard(String filename) {
         In in = new In(filename);
         int N = in.readInt();
@@ -94,7 +93,14 @@ public class TestSolver {
         Board start = new Board(tiles);
         return start;
     }
-
+    @Test
+    public void testManhattan(){
+        String puzzleName = "input/puzzle4x4-30.txt";
+        Board b = readBoard(puzzleName);
+        System.out.println(b.manhattan());
+        //Solver s = new Solver(b);
+        //System.out.println();
+    }
     @Test(timeout = 1000)
     public void test2x2BoardPuzzles() {
         for (int i = 0; i <= 6; i += 1) {
@@ -108,15 +114,18 @@ public class TestSolver {
         }
     }
 
-    @Test(timeout = 40000)
+    @Test(timeout = 50000)
     public void test3x3BoardPuzzles() {
         for (int i = 0; i <= 30; i += 1) {
             String pnum = String.format("%02d", i);
             String puzzleName = "input/puzzle3x3-" + pnum + ".txt";
+            System.out.println(puzzleName);
             Board b = readBoard(puzzleName);
             int numMoves = i;
             BoardPuzzleSolution bps = new BoardPuzzleSolution(puzzleName, b, numMoves);
+            System.out.println("solve start");
             Solver s = new Solver(b);
+            System.out.println("solve done");
             assertEquals("Wrong number of moves on " + puzzleName, bps.numMoves, s.moves());
         }
     }
@@ -126,10 +135,13 @@ public class TestSolver {
         for (int i = 0; i <= 30; i += 1) {
             String pnum = String.format("%02d", i);
             String puzzleName = "input/puzzle4x4-" + pnum + ".txt";
+            System.out.println(puzzleName);
             Board b = readBoard(puzzleName);
             int numMoves = i;
             BoardPuzzleSolution bps = new BoardPuzzleSolution(puzzleName, b, numMoves);
+            System.out.println("solve start");
             Solver s = new Solver(b);
+            System.out.println("solve done");
             assertEquals("Wrong number of moves on " + puzzleName, bps.numMoves, s.moves());
         }
     }
@@ -145,5 +157,5 @@ public class TestSolver {
             Solver s = new Solver(b);
             assertEquals("Wrong number of moves on " + puzzleName, bps.numMoves, s.moves());
         }
-    }*/
+    }
 }
