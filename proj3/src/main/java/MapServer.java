@@ -115,7 +115,7 @@ public class MapServer {
             Map<String, Object> rasteredImgParams = rasterer.getMapRaster(params);
 
             boolean rasterSuccess = validateRasteredImgParams(rasteredImgParams);
-
+            System.out.println(rasteredImgParams);
             if (rasterSuccess) {
                 writeImagesToOutputStream(rasteredImgParams, os);
                 String encodedImage = Base64.getEncoder().encodeToString(os.toByteArray());
@@ -181,6 +181,7 @@ public class MapServer {
     private static HashMap<String, Double> getRequestParams(
             spark.Request req, String[] requiredParams) {
         Set<String> reqParams = req.queryParams();
+        //System.out.println(reqParams);
         HashMap<String, Double> params = new HashMap<>();
         for (String param : requiredParams) {
             if (!reqParams.contains(param)) {

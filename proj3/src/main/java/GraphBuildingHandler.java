@@ -4,6 +4,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,13 +39,47 @@ public class GraphBuildingHandler extends DefaultHandler {
                     "secondary_link", "tertiary_link"));
     private String activeState = "";
     private final GraphDB g;
+    long lastNodeId;
 
+    long lastWayId;
+    GraphDB.Intersect currentNode;
+    WrapWay currentWay;
+    public static class WrapWay{
+        public GraphDB.Way way;
+        public boolean isValid;
+        public WrapWay(long id){
+            this.way = new GraphDB.Way(id);
+            this.isValid = false;
+        }
+        public GraphDB.Way getWay(){
+            return way;
+        }
+        public boolean isValid(){
+            return isValid;
+        }
+        public void addNode(long ref){
+            this.way.nodes.add(ref);
+        }
+        public void setName(String name){
+            this.way.name = name;
+        }
+        public void setValid(){
+            this.isValid = true;
+        }
+        public List<Long> getNodes(){
+            return this.way.getNodes();
+        }
+        public long getWayId(){
+            return way.id;
+        }
+    }
     /**
      * Create a new GraphBuildingHandler.
      * @param g The graph to populate with the XML data.
      */
     public GraphBuildingHandler(GraphDB g) {
         this.g = g;
+        lastNodeId=0;
     }
 
     /**
@@ -68,6 +103,19 @@ public class GraphBuildingHandler extends DefaultHandler {
         if (qName.equals("node")) {
             /* We encountered a new <node...> tag. */
             activeState = "node";
+            long currentNodeId = Long.parseLong(attributes.getValue("id"));
+            if(currentNodeId!= lastNodeId){
+                //do node safe with has node
+                if(currentNode!=null){
+                    //do node insert and create a new node
+                    this.g.addIntersect(currentNode);
+
+                }
+            }
+            double currentLon = Double.parseDouble(attributes.getValue("lon"));
+            double currentLat = Double.parseDouble(attributes.getValue("lat"));
+            currentNode = new GraphDB.Intersect(currentNodeId,currentLat,currentLon);
+
 //            System.out.println("Node id: " + attributes.getValue("id"));
 //            System.out.println("Node lon: " + attributes.getValue("lon"));
 //            System.out.println("Node lat: " + attributes.getValue("lat"));
@@ -78,6 +126,15 @@ public class GraphBuildingHandler extends DefaultHandler {
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
             activeState = "way";
+            long currentWayId = Long.parseLong(attributes.getValue("id"));
+            if(currentWayId != lastWayId){
+                if(currentWay!=null && currentWay.isValid()){
+                    this.g.addWay(currentWay.getWay());
+                }
+            }
+            currentWay = new WrapWay(currentWayId);
+            //System.out.println("Way id: " + attributes.getValue("id"));
+
 //            System.out.println("Beginning a way...");
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
@@ -89,7 +146,8 @@ public class GraphBuildingHandler extends DefaultHandler {
             cumbersome since you might have to remove the connections if you later see a tag that
             makes this way invalid. Instead, think of keeping a list of possible connections and
             remember whether this way is valid or not. */
-
+            long ref = Long.parseLong(attributes.getValue("ref"));
+            this.currentWay.addNode(ref);
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
             String k = attributes.getValue("k");
@@ -100,9 +158,13 @@ public class GraphBuildingHandler extends DefaultHandler {
             } else if (k.equals("highway")) {
                 //System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
+                if(ALLOWED_HIGHWAY_TYPES.contains(v)){
+                    this.currentWay.setValid();
+                }
                 /* Hint: Setting a "flag" is good enough! */
             } else if (k.equals("name")) {
                 //System.out.println("Way Name: " + v);
+                this.currentWay.setName(v);
             }
 //            System.out.println("Tag with k=" + k + ", v=" + v + ".");
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
@@ -112,7 +174,9 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Hint: Since we found this <tag...> INSIDE a node, we should probably remember which
             node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
             last node that you looked at (check the first if-case). */
-//            System.out.println("Node's name: " + attributes.getValue("v"));
+            //System.out.println("Node's name: " + attributes.getValue("v"));
+            String v = attributes.getValue("v");
+            this.currentNode.setName(v);
         }
     }
 
@@ -134,6 +198,23 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
+            if(this.currentWay.isValid()){
+                long wayId = this.currentWay.getWayId();
+                //do connection
+                List<Long> nodes = this.currentWay.getNodes();
+                for(int i=0;i<nodes.size();i++){
+                    GraphDB.Intersect  targetNode = this.g.getIntersect(nodes.get(i));
+                    int lastNode = i-1;
+                    int nextNode = i+1;
+                    if(lastNode>=0){
+                        targetNode.addEdge(nodes.get(lastNode),wayId);
+                    }
+                    if(nextNode<nodes.size()){
+                        targetNode.addEdge(nodes.get(nextNode),wayId);
+                    }
+
+                }
+            }
         }
     }
 

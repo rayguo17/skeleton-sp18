@@ -1,5 +1,5 @@
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +25,100 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
+        long startNode = g.closest(stlon,stlat);
+        long endNode = g.closest(destlon,destlat);
+        System.out.printf("startNode: %d, endNode: %d\n",startNode,endNode);
+        Iterable<Long> vertices = g.vertices();
+        Map<Long,Property> propertyMap = new HashMap<>();
+        List<Long> res = new ArrayList<>();
+        vertices.forEach(new Consumer<Long>() {
+            @Override
+            public void accept(Long aLong) {
+                long edgeTo = -1;
+                double distTo = Double.MAX_VALUE;
+                double heuristic = g.distance(aLong,endNode);
+                boolean marked = false;
+                if(aLong == startNode) {
+                    edgeTo = startNode;
+                    distTo = 0;
+                }
+                propertyMap.put(aLong,new Property(edgeTo,distTo,heuristic,marked));
+            }
+        });
+        PriorityQueue<PQNode> pq = new PriorityQueue<>(new Comparator<PQNode>() {
+            @Override
+            public int compare(PQNode pqNode, PQNode t1) {
+                return (int) ((pqNode.priority-t1.priority)*100000);
+            }
+        });
+        Property startPro = propertyMap.get(startNode);
+        pq.add(new PQNode(startPro.getPriority(),startNode));
+        while(!pq.isEmpty()){
+            PQNode targetNode = pq.remove();
+            long target = targetNode.id;
+            Property tarPro = propertyMap.get(target);
+            tarPro.marked = true;
+            if(target==endNode){
+                //found!
+                long tmp = target;
+                while(tmp != startNode){
+                    res.add(tmp);
+                    Property tmpPro = propertyMap.get(tmp);
+                    System.out.println(tmpPro.distTo);
+                    tmp = tmpPro.edgeTo;
+
+                }
+                res.add(startNode);
+                //System.out.println(tarPro.distTo);
+                return res;
+            }
+            for(long w: g.adjacent(target)){
+                Property wPro = propertyMap.get(w);
+                if(!wPro.marked){
+                    //compare
+
+                    double disTarToW = g.distance(w,target);
+                    if(wPro.edgeTo==-1){
+                        wPro.edgeTo = target;
+                        wPro.distTo = tarPro.distTo+ disTarToW;
+                    }else{
+                        if(wPro.distTo>tarPro.distTo+ disTarToW){
+                            wPro.distTo = tarPro.distTo+disTarToW;
+                            wPro.edgeTo = target;
+                        }
+                    }
+
+
+                    double wPriority = wPro.getPriority();
+                    pq.add(new PQNode(wPriority,w));
+                }
+            }
+        }
+
         return null; // FIXME
+    }
+    public static class PQNode{
+        double priority;
+        long id;
+        public PQNode(double priority, long id){
+            this.id = id;
+            this.priority = priority;
+        }
+    }
+    public static class Property{
+        long edgeTo;
+        double distTo;
+        double heuristic;
+        boolean marked;
+        public Property(long edgeTo, double distTo, double heuristic, boolean marked){
+            this.edgeTo = edgeTo;
+            this.distTo = distTo;
+            this.heuristic = heuristic;
+            this.marked = marked;
+        }
+        public double getPriority(){
+            return distTo==Double.MAX_VALUE? distTo : distTo + heuristic;
+        }
     }
 
     /**
@@ -37,6 +130,7 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
+
         return null; // FIXME
     }
 

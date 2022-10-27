@@ -32,7 +32,10 @@ public class GraphDBLauncher {
         long v = g.closest(-122.258207, 37.875352);
         System.out.print("The vertex number closest to -122.258207, 37.875352 is " + v + ", which");
         System.out.println(" has longitude, latitude of: " + g.lon(v) + ", " + g.lat(v));
-
+        List<Long> res = Router.shortestPath(g,-122.2698401,37.8398724,-122.274915,37.8438257);
+        for(Long l: res){
+            System.out.println(l);
+        }
         System.out.println("To get started, uncomment print statements in GraphBuildingHandler.");
     }
 }
